@@ -1,0 +1,21 @@
+# IDE config
+.vscode
+.env
+.idea
+
+# Python files
+.mypy_cache
+*__pycache__*
+.venv
+.python-version
+
+# Test files
+.pytest_cache
+.coverage*
+htmlcov
+junit.xml
+cov.xml
+coverage.xml
+
+# SSH
+wk_github
