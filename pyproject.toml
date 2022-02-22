@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "NLP API"
+version = "0.1.0"
+description = ""
+authors = []
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0"
+python-json-logger = "^2.0"
+uvicorn = {version = "^0", extras = ["standard"]}
+
+[tool.poetry.dev-dependencies]
+mypy = "^0"
+flake8 = "^3.9"
+pydocstyle = "^6.1"
+pytest = "^6.2"
+pytest-cov = "^2.12"
+requests = "^2.25"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
