@@ -21,6 +21,18 @@ app = FastAPI(
 )
 
 
+@app.post("/inference", status_code=HTTP_200_OK)
+async def inference(payload: Dict):
+    """
+    NLP inference endpoint.
+
+    :param payload:
+    :return:
+    """
+    log.info(f"Received request: {payload}")
+    return {"message": "OK"}
+
+
 @app.get("/", status_code=HTTP_200_OK)
 async def root() -> Dict:
     """Root API path.
