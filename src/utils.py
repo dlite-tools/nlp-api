@@ -1,9 +1,9 @@
 """Util functions."""
-from typing import List
 import nlpiper
 import torch
 
 from inference.architectures.text_classification import BaselineModel
+from inference.data_processors.processor import Processor
 from inference.data_processors.transformers.preprocessing import (
     NLPiperIntegration,
     VocabTransform
@@ -20,6 +20,7 @@ NEWS_CLASSIFICATION = {
     4: "Sci/Tec"
 }
 EMBED_DIM = 64
+MODEL_OFFSETS = torch.zeros(1, dtype=torch.long)
 
 VOCAB_TRANSFORM = VocabTransform(torch.load(VOCABULARY_PATH))
 
@@ -41,15 +42,15 @@ def get_model() -> BaselineModel:
     return model
 
 
-def get_preprocessing() -> List:
+def get_preprocessor() -> Processor:
     """Load preprocessing pipeline.
 
     Returns
     -------
-    List
+    Processor
         Preprocessing pipeline steps to be applied before inference.
     """
-    return [
+    preprocessing = [
         NLPiperIntegration(
             pipeline=nlpiper.core.Compose(
                 [
@@ -61,3 +62,5 @@ def get_preprocessing() -> List:
         ),
         VOCAB_TRANSFORM
     ]
+
+    return Processor(preprocessing=preprocessing)

@@ -2,19 +2,22 @@
 import torch
 from typing import Dict
 
-from inference.data_processors.processor import Processor
-from fastapi import FastAPI
-from nlpiper.core import Document
+from fastapi import (
+    FastAPI,
+    HTTPException
+)
 from pydantic import BaseModel
 from starlette.status import (
     HTTP_200_OK,
-    HTTP_204_NO_CONTENT
+    HTTP_204_NO_CONTENT,
+    HTTP_500_INTERNAL_SERVER_ERROR
 )
 
 from src.logger import get_logger, ENV
 from src.utils import (
     get_model,
-    get_preprocessing,
+    get_preprocessor,
+    MODEL_OFFSETS,
     NEWS_CLASSIFICATION
 )
 from src.version import SERVICE_VERSION
@@ -43,7 +46,7 @@ app = FastAPI(
 model = get_model()
 
 # Load preprocessing pipeline
-preprocessing = get_preprocessing()
+preprocessor = get_preprocessor()
 
 
 @app.post("/inference", response_model=NewsClassification, status_code=HTTP_200_OK)
@@ -62,19 +65,38 @@ async def inference(news: News):
     """
     log.info(f"Received request: {news}")
 
-    # Apply preprocessing
-    processor = Processor(preprocessing=preprocessing)
-    doc = processor.preprocess(Document(news.text))
+    try:
+        # Apply preprocessing
+        news_processed = preprocessor.preprocess(news.text)
+    except Exception as e:
+        log.error(f"Error applying preprocessing: {e}")
+        raise HTTPException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error applying preprocessing: {e}"
+        )
 
-    # Model inference
-    with torch.no_grad():
-        offsets = torch.zeros(1, dtype=torch.long)
-        inference = model(doc.output, offsets)
+    try:
+        # Model inference
+        with torch.no_grad():
+            inference = model(news_processed, MODEL_OFFSETS)
+    except Exception as e:
+        log.error(f"Error applying inference: {e}")
+        raise HTTPException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error applying inference: {e}"
+        )
 
-    # Postprocessing
-    predicted_class = inference.argmax(1).item() + 1
-    news_classification = NEWS_CLASSIFICATION[predicted_class]
-    confidence = round(inference.softmax(1).max().item(), 4) * 100
+    try:
+        # Postprocessing
+        predicted_class = inference.argmax(1).item() + 1
+        news_classification = NEWS_CLASSIFICATION[predicted_class]
+        confidence = round(inference.softmax(1).max().item(), 4) * 100
+    except Exception as e:
+        log.error(f"Error applying postprocessing: {e}")
+        raise HTTPException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error applying postprocessing: {e}"
+        )
 
     log.info(f"Predicted class: {news_classification}")
     log.info(f"Confidence: {confidence}")

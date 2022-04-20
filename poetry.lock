@@ -207,7 +207,7 @@ python-versions = "*"
 
 [[package]]
 name = "nlp-training"
-version = "0.0.2"
+version = "0.0.3"
 description = "NLP training repository."
 category = "main"
 optional = false
@@ -223,8 +223,8 @@ training = ["pytorch-lightning (>=1.6.1,<2.0.0)", "tqdm (>=4.64.0,<5.0.0)", "nlp
 [package.source]
 type = "git"
 url = "https://github.com/dlite-tools/nlp-training.git"
-reference = "0.0.2"
-resolved_reference = "8d938ec6ffad3eb5f0befd5590cf35ac2bbbf0fb"
+reference = "0.0.3"
+resolved_reference = "0d1c351c2363d14ec6b3501a39a5f603095ad7b9"
 
 [[package]]
 name = "nlpiper"
@@ -649,7 +649,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "51c41086daef5a5f9ca442b5714682ff6ac0f6805b7eb3a93cfcc041ad7a0097"
+content-hash = "b32236a632a232291e947abb0fd935f4c427d2d1f15d2863658424274ce8b8ba"
 
 [metadata.files]
 anyio = [
