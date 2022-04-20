@@ -1,36 +1,88 @@
 """API module with infra endpoints."""
-from typing import Dict
+import torch
 
+from inference.data_processors.processor import Processor
 from fastapi import FastAPI
+from nlpiper.core import Document
+from pydantic import BaseModel
 from starlette.status import (
     HTTP_200_OK,
     HTTP_204_NO_CONTENT
 )
+from typing import Dict
 
 from src.logger import get_logger, ENV
+from src.utils import (
+    get_model,
+    get_preprocessing,
+    NEWS_CLASSIFICATION
+)
 from src.version import SERVICE_VERSION
 
 log = get_logger(__name__)
 
+
+class News(BaseModel):
+    """News model."""
+    text: str
+
+
+class NewsClassification(BaseModel):
+    """News classification model."""
+    classification: str
+    confidence: float
+
+
 app = FastAPI(
     title="NLP API",
     description="Python API for NLP inference",
-    version=SERVICE_VERSION,
-    redoc_url=None,
-    docs_url="/docs"
+    version=SERVICE_VERSION
 )
 
+# Load machine learning model
+model = get_model()
 
-@app.post("/inference", status_code=HTTP_200_OK)
-async def inference(payload: Dict):
-    """
-    NLP inference endpoint.
+# Load preprocessing pipeline
+preprocessing = get_preprocessing()
 
-    :param payload:
-    :return:
+
+@app.post("/inference", response_model=NewsClassification, status_code=HTTP_200_OK)
+async def inference(news: News):
+    """Inference endpoint.
+
+    Parameters
+    ----------
+    news : News
+        News to be classified.
+
+    Returns
+    -------
+    NewsClassification
+        News classification result with confidence score.
     """
-    log.info(f"Received request: {payload}")
-    return {"message": "OK"}
+    log.info(f"Received request: {news}")
+
+    # Apply preprocessing
+    processor = Processor(preprocessing=preprocessing)
+    doc = processor.preprocess(Document(news.text))
+
+    # Model inference
+    with torch.no_grad():
+        offsets = torch.zeros(1, dtype=torch.long)
+        inference = model(doc.output, offsets)
+
+    # Postprocessing
+    predicted_class = inference.argmax(1).item() + 1
+    news_classification = NEWS_CLASSIFICATION[predicted_class]
+    confidence = round(inference.softmax(1).max().item(), 4) * 100
+
+    log.info(f"Predicted class: {news_classification}")
+    log.info(f"Confidence: {confidence}")
+
+    return {
+        "classification": news_classification,
+        "confidence": confidence
+    }
 
 
 @app.get("/", status_code=HTTP_200_OK)
