@@ -1,5 +1,6 @@
 """API module with infra endpoints."""
 import torch
+from typing import Dict
 
 from inference.data_processors.processor import Processor
 from fastapi import FastAPI
@@ -9,7 +10,6 @@ from starlette.status import (
     HTTP_200_OK,
     HTTP_204_NO_CONTENT
 )
-from typing import Dict
 
 from src.logger import get_logger, ENV
 from src.utils import (
