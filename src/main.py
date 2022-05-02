@@ -1,24 +1,72 @@
 """API module with infra endpoints."""
+import torch
 from typing import Dict
 
-from fastapi import FastAPI
+from fastapi import (
+    FastAPI,
+    HTTPException
+)
+from pydantic import BaseModel
 from starlette.status import (
     HTTP_200_OK,
-    HTTP_204_NO_CONTENT
+    HTTP_204_NO_CONTENT,
+    HTTP_501_NOT_IMPLEMENTED
 )
 
 from src.logger import get_logger, ENV
+from src.utils import (
+    get_model,
+    get_preprocessor,
+    MODEL_OFFSETS,
+    NEWS_CLASSIFICATION
+)
 from src.version import SERVICE_VERSION
 
 log = get_logger(__name__)
 
+
+class News(BaseModel):
+    """News model."""
+    text: str
+
+
+class NewsClassification(BaseModel):
+    """News classification model."""
+    classification: str
+    confidence: float
+
+
 app = FastAPI(
     title="NLP API",
     description="Python API for NLP inference",
-    version=SERVICE_VERSION,
-    redoc_url=None,
-    docs_url="/docs"
+    version=SERVICE_VERSION
 )
+
+# Load machine learning model
+model = get_model()
+
+# Load preprocessing pipeline
+preprocessor = get_preprocessor()
+
+
+@app.post("/inference", response_model=NewsClassification, status_code=HTTP_200_OK)
+async def inference(news: News):
+    """Inference endpoint.
+
+    Parameters
+    ----------
+    news : News
+        News to be classified.
+
+    Returns
+    -------
+    NewsClassification
+        News classification result with confidence score.
+    """
+    raise HTTPException(
+        status_code=HTTP_501_NOT_IMPLEMENTED,
+        detail="Inference endpoint is not implemented yet."
+    )
 
 
 @app.get("/", status_code=HTTP_200_OK)
