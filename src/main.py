@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from starlette.status import (
     HTTP_200_OK,
     HTTP_204_NO_CONTENT,
-    HTTP_500_INTERNAL_SERVER_ERROR
+    HTTP_501_NOT_IMPLEMENTED
 )
 
 from src.logger import get_logger, ENV
@@ -63,48 +63,10 @@ async def inference(news: News):
     NewsClassification
         News classification result with confidence score.
     """
-    log.info(f"Received request: {news}")
-
-    try:
-        # Apply preprocessing
-        news_processed = preprocessor.preprocess(news.text)
-    except Exception as e:
-        log.error(f"Error applying preprocessing: {e}")
-        raise HTTPException(
-            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error applying preprocessing: {e}"
-        )
-
-    try:
-        # Model inference
-        with torch.no_grad():
-            inference = model(news_processed, MODEL_OFFSETS)
-    except Exception as e:
-        log.error(f"Error applying inference: {e}")
-        raise HTTPException(
-            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error applying inference: {e}"
-        )
-
-    try:
-        # Postprocessing
-        predicted_class = inference.argmax(1).item() + 1
-        news_classification = NEWS_CLASSIFICATION[predicted_class]
-        confidence = round(inference.softmax(1).max().item(), 4) * 100
-    except Exception as e:
-        log.error(f"Error applying postprocessing: {e}")
-        raise HTTPException(
-            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error applying postprocessing: {e}"
-        )
-
-    log.info(f"Predicted class: {news_classification}")
-    log.info(f"Confidence: {confidence}")
-
-    return {
-        "classification": news_classification,
-        "confidence": confidence
-    }
+    raise HTTPException(
+        status_code=HTTP_501_NOT_IMPLEMENTED,
+        detail="Inference endpoint is not implemented yet."
+    )
 
 
 @app.get("/", status_code=HTTP_200_OK)
