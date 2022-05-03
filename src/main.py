@@ -10,12 +10,14 @@ from pydantic import BaseModel
 from starlette.status import (
     HTTP_200_OK,
     HTTP_204_NO_CONTENT,
+    HTTP_500_INTERNAL_SERVER_ERROR,
     HTTP_501_NOT_IMPLEMENTED
 )
 
 from src.logger import get_logger, ENV
 from src.utils import (
     get_model,
+    get_postprocessor,
     get_preprocessor,
     MODEL_OFFSETS,
     NEWS_CLASSIFICATION
@@ -42,11 +44,14 @@ app = FastAPI(
     version=SERVICE_VERSION
 )
 
+# Load preprocessing pipeline
+preprocessor = get_preprocessor()
+
 # Load machine learning model
 model = get_model()
 
-# Load preprocessing pipeline
-preprocessor = get_preprocessor()
+# Load postprocessing pipeline
+postprocessor = get_postprocessor()
 
 
 @app.post("/inference", response_model=NewsClassification, status_code=HTTP_200_OK)
@@ -63,9 +68,23 @@ async def inference(news: News):
     NewsClassification
         News classification result with confidence score.
     """
+    # Implement preprocessing
+    # news_processed = preprocessor.preprocess(news.text)
+
+    # try:
+    #     # Model inference
+    #     with torch.no_grad():
+    #         inference = model(news_processed, MODEL_OFFSETS)
+    # except Exception as e:
+    #     log.error(f"Error applying inference: {e}")
+    #     raise HTTPException(
+    #         status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+    #         detail=f"Error applying inference: {e}"
+    #     )
+
     raise HTTPException(
         status_code=HTTP_501_NOT_IMPLEMENTED,
-        detail="Inference endpoint is not implemented yet."
+        detail="Inference endpoint not implemented"
     )
 
 
