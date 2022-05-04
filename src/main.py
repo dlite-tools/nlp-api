@@ -82,10 +82,51 @@ async def inference(news: News):
     #         detail=f"Error applying inference: {e}"
     #     )
 
-    raise HTTPException(
-        status_code=HTTP_501_NOT_IMPLEMENTED,
-        detail="Inference endpoint not implemented"
-    )
+    # raise HTTPException(
+    #     status_code=HTTP_501_NOT_IMPLEMENTED,
+    #     detail="Inference endpoint not implemented"
+    # )
+
+    log.info(f"Received request: {news}")
+
+    try:
+        # Apply preprocessing
+        news_processed = preprocessor.preprocess(news.text)
+    except Exception as e:
+        log.error(f"Error applying preprocessing: {e}")
+        raise HTTPException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error applying preprocessing: {e}"
+        )
+
+    try:
+        # Model inference
+        with torch.no_grad():
+            inference = model(news_processed, MODEL_OFFSETS)
+    except Exception as e:
+        log.error(f"Error applying inference: {e}")
+        raise HTTPException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error applying inference: {e}"
+        )
+
+    try:
+        # Postprocessing
+        news_classification, confidence = postprocessor(inference)
+    except Exception as e:
+        log.error(f"Error applying postprocessing: {e}")
+        raise HTTPException(
+            status_code=HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error applying postprocessing: {e}"
+        )
+
+    log.info(f"Predicted class: {news_classification}")
+    log.info(f"Confidence: {confidence}")
+
+    return {
+        "classification": news_classification,
+        "confidence": confidence
+    }
 
 
 @app.get("/", status_code=HTTP_200_OK)
