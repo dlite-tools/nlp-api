@@ -44,6 +44,7 @@ EXPOSE 5000
 COPY --from=base $homedir/.venv $homedir/.venv
 
 COPY src $homedir/src
+COPY ml $homedir/ml
 
 RUN chown -R $userid:$userid $homedir
 
