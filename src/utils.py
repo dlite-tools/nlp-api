@@ -9,6 +9,8 @@ from inference.data_processors.transformers.preprocessing import (
     VocabTransform
 )
 
+from inference.data_processors.transformers.postprocessing.get_max import GetMaxPrediction
+
 
 # Constants
 MODEL_PATH = "ml/model.ckpt"
@@ -50,17 +52,17 @@ def get_preprocessor() -> Processor:
     Processor
         Preprocessing pipeline steps to be applied before inference.
     """
-    preprocessing = [
-        NLPiperIntegration(
-            pipeline=nlpiper.core.Compose(
-                [
-                    nlpiper.transformers.cleaners.CleanPunctuation(),
-                    nlpiper.transformers.tokenizers.BasicTokenizer(),
-                    nlpiper.transformers.normalizers.CaseTokens(),
-                ]
-            )
-        ),
-        VOCAB_TRANSFORM
-    ]
+    preprocessing = []  # TODO: Implement preprocessing pipeline
 
     return Processor(preprocessing=preprocessing)
+
+
+def get_postprocessor() -> Processor:
+    """Load postprocessing pipeline.
+
+    Returns
+    -------
+    Processor
+        Postprocessing pipeline steps to be applied after inference.
+    """
+    # TODO: Implement postprocessing pipeline
