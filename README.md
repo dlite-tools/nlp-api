@@ -31,7 +31,6 @@ We will use [Poetry](https://python-poetry.org/) to manage our dependencies and 
 poetry install
 ```
 
-
 The dependencies can also be installed using the `requirements.txt`:
 ```
 pip install -r requirements.txt
