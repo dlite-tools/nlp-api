@@ -16,9 +16,9 @@ from starlette.status import (
 from src.logger import get_logger, ENV
 from src.utils import (
     get_model,
+    get_postprocessor,
     get_preprocessor,
-    MODEL_OFFSETS,
-    NEWS_CLASSIFICATION
+    MODEL_OFFSETS
 )
 from src.version import SERVICE_VERSION
 
@@ -42,11 +42,14 @@ app = FastAPI(
     version=SERVICE_VERSION
 )
 
+# Load preprocessing pipeline
+preprocessor = get_preprocessor()
+
 # Load machine learning model
 model = get_model()
 
-# Load preprocessing pipeline
-preprocessor = get_preprocessor()
+# Load postprocessing pipeline
+postprocessor = get_postprocessor()
 
 
 @app.post("/inference", response_model=NewsClassification, status_code=HTTP_200_OK)
@@ -88,9 +91,7 @@ async def inference(news: News):
 
     try:
         # Postprocessing
-        predicted_class = inference.argmax(1).item() + 1
-        news_classification = NEWS_CLASSIFICATION[predicted_class]
-        confidence = round(inference.softmax(1).max().item(), 4) * 100
+        news_classification, confidence = postprocessor(inference)
     except Exception as e:
         log.error(f"Error applying postprocessing: {e}")
         raise HTTPException(

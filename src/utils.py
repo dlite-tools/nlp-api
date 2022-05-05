@@ -9,6 +9,8 @@ from inference.data_processors.transformers.preprocessing import (
     VocabTransform
 )
 
+from inference.data_processors.transformers.postprocessing.get_max import GetMaxPrediction
+
 
 # Constants
 MODEL_PATH = "ml/model.ckpt"
@@ -64,3 +66,14 @@ def get_preprocessor() -> Processor:
     ]
 
     return Processor(preprocessing=preprocessing)
+
+
+def get_postprocessor() -> Processor:
+    """Load postprocessing pipeline.
+
+    Returns
+    -------
+    Processor
+        Postprocessing pipeline steps to be applied after inference.
+    """
+    return GetMaxPrediction(NEWS_CLASSIFICATION)
