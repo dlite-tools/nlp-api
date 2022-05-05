@@ -31,7 +31,11 @@ We will use [Poetry](https://python-poetry.org/) to manage our dependencies and 
 poetry install
 ```
 
-You can use other tools, like Pipenv, to manage your python virtual environments using the `requirements.txt`.
+
+The dependencies can also be installed using the `requirements.txt`:
+```
+pip install -r requirements.txt
+```
 
 # Run the server
 

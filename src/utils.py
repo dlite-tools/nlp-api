@@ -52,10 +52,6 @@ def get_preprocessor() -> Processor:
     Processor
         Preprocessing pipeline steps to be applied before inference.
     """
-    # preprocessing = []  # TODO: Implement preprocessing pipeline
-
-    # return Processor(preprocessing=preprocessing)
-
     preprocessing = [
         NLPiperIntegration(
             pipeline=nlpiper.core.Compose(
@@ -80,6 +76,4 @@ def get_postprocessor() -> Processor:
     Processor
         Postprocessing pipeline steps to be applied after inference.
     """
-    # TODO: Implement postprocessing pipeline
-
     return GetMaxPrediction(NEWS_CLASSIFICATION)
